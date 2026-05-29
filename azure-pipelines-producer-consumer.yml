@@ -93,5 +93,5 @@ stages:
                 argocd app create kafka-producer-consumer --project default --repo https://github.com/singhritesh85/strimzi-kafka-demo.git --path ./manifests/kafka-client/ --dest-namespace producer-consumer --sync-option CreateNamespace=true --dest-server https://kubernetes.default.svc --sync-policy automated --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster --upsert
                 #argocd app sync kafka-producer-consumer --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
                 kubectl get pods -n producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
-              env: 
-                TAG_NUMBER=$(Build.BuildId)  
+            env: 
+              TAG_NUMBER=$(Build.BuildId)  
