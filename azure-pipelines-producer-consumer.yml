@@ -94,4 +94,4 @@ stages:
                 #argocd app sync kafka-producer-consumer --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
                 kubectl get pods -n producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
             env: 
-              TAG_NUMBER=$(Build.BuildId)  
+              TAG_NUMBER: $(Build.BuildId)  
