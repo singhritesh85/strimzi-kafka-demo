@@ -4,6 +4,6 @@ resources:
   - ../../base
 images:
   - name: singhritesh85/kafka-producer
-    newTag: "stable"
+    newTag: "latest"
   - name: singhritesh85/kafka-consumer
-    newTag: "stable"
+    newTag: "latest"
