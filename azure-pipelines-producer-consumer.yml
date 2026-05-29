@@ -88,8 +88,8 @@ stages:
           - task: CmdLine@2
             inputs:
               script: |
-                sed -i "s|TAG_NUMBER|$(Build.BuildId)|g" $(System.DefaultWorkingDirectory)/manifests/kafka-client/kafka-producer.yaml
-                sed -i "s|TAG_NUMBER|$(Build.BuildId)|g" $(System.DefaultWorkingDirectory)/manifests/kafka-client/kafka-consumer.yaml
+                sed -i "s|TAG_NUMBER|$(Build.BuildId)|g" $(System.DefaultWorkingDirectory)/manifests/kafka-client/kafka-producer-deployment.yml
+                sed -i "s|TAG_NUMBER|$(Build.BuildId)|g" $(System.DefaultWorkingDirectory)/manifests/kafka-client/kafka-consumer-deployment.yml
                 yes|argocd login argocd.singhritesh85.com --username admin --password $(ARGOCD_PASSWORD) --grpc-web --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
                 argocd repo add https://github.com/singhritesh85/strimzi-kafka-demo.git --username $(GITHUB_USERNAME) --password $(GITHUB_PASSWORD) --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
                 argocd app create kafka-producer-consumer --project default --repo https://github.com/singhritesh85/strimzi-kafka-demo.git --path ./manifests/kafka-client/ --dest-namespace producer-consumer --sync-option CreateNamespace=true --dest-server https://kubernetes.default.svc --sync-policy automated --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster --upsert
