@@ -47,8 +47,7 @@ stages:
   - job: DockerImageBuild
     displayName: DockerImageBuild
     steps:
-    - checkout: self
-      clean: true
+    - checkout: None
     - task: CmdLine@2
       inputs:
         script: |
@@ -85,7 +84,8 @@ stages:
       runOnce:
         deploy:
           steps:
-          - checkout: none
+          - checkout: self
+            clean: true
           - task: CmdLine@2
             inputs:
               script: |
