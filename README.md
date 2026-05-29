@@ -1,1 +1,0 @@
-# strimzi-kafka-demo
