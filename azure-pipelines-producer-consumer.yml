@@ -68,14 +68,12 @@ stages:
         repository: 'singhritesh85/kafka-producer'
         command: 'buildAndPush'
         Dockerfile: '**/src/kafka-producer/Dockerfile'
-        tags: 'latest'
     - task: Docker@2
       inputs:
         containerRegistry: 'Docker-Registry'
         repository: 'singhritesh85/kafka-consumer'
         command: 'buildAndPush'
         Dockerfile: '**/src/kafka-consumer/Dockerfile'
-        tags: 'latest'
 - stage: KubernetesDeployment
   displayName: KubernetesDeployment
   dependsOn: DockerImageBuild
