@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: kafka-consumer
-        image: singhritesh85/kafka-consumer
+        image: kafka-consumer
         ports:
         - containerPort: 8080
           name: http
