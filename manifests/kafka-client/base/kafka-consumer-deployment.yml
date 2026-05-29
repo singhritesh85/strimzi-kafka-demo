@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: kafka-consumer
-        image: singhritesh85/kafka-consumer:${Build.BuildId}
+        image: singhritesh85/kafka-consumer
         ports:
         - containerPort: 8080
           name: http
