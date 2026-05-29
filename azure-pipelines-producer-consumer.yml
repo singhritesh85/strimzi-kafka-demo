@@ -47,7 +47,7 @@ stages:
   - job: DockerImageBuild
     displayName: DockerImageBuild
     steps:
-    - checkout: None
+    - checkout: none
     - task: CmdLine@2
       inputs:
         script: |
