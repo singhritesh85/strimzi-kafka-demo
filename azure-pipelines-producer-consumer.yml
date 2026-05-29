@@ -1,0 +1,84 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+pool:
+  name: demo
+  demands:
+  - agent.name -equals demo
+
+stages:
+- stage: Build
+  displayName: Build
+  jobs:
+  - job: Build
+    displayName: Build
+    workspace:
+      clean: all
+    steps:
+    - task: Maven@4
+      inputs:
+        azureSubscription: 'Azure DevOps Service Connection'
+        mavenPomFile: 'src/kafka-producer/pom.xml'
+        goals: 'clean install'
+        publishJUnitResults: false
+        javaHomeOption: 'JDKVersion'
+        mavenVersionOption: 'Default'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: false
+        sonarQubeRunAnalysis: false
+- stage: DockerImageBuild
+  displayName: DockerImageBuild
+  dependsOn: Build
+  jobs:
+  - job: DockerImageBuild
+    displayName: DockerImageBuild
+    steps:
+    - checkout: none
+    - task: CmdLine@2
+      inputs:
+        script: |
+          if [[ -z `/bin/bash -c "kubectl get secret -n producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster|grep producer-consumer-app-secret|cut -d ' ' -f1"` ]]
+          then
+            kubectl create secret docker-registry producer-consumer-app-secret --docker-server=docker.io --docker-username=$(DOCKERHUB_USERNAME) --docker-password=$(DOCKERHUB_PASSWORD) --namespace=producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
+          fi 
+          docker system prune -f --all
+          cd src/kafka-producer && docker build -t singhritesh85/kafka-producer:$(Build.BuildId) -f Dockerfile .
+          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-producer:$(Build.BuildId)
+          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-producer:$(Build.BuildId)
+          cd src/kafka-consumer && docker build -t singhritesh85/kafka-consumer:$(Build.BuildId) -f Dockerfile .
+          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-consumer:$(Build.BuildId)
+          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-consumer:$(Build.BuildId)    
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'Docker-Registry'
+        repository: 'singhritesh85/kafka-producer'
+        command: 'buildAndPush'
+        Dockerfile: '**/src/kafka-producer/Dockerfile'
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'Docker-Registry'
+        repository: 'singhritesh85/kafka-consumer'
+        command: 'buildAndPush'
+        Dockerfile: '**/src/kafka-consumer/Dockerfile'
+- stage: KubernetesDeployment
+  displayName: KubernetesDeployment
+  dependsOn: DockerImageBuild
+  jobs:
+  - deployment: KubernetesDeployment
+    environment: "dev"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: none
+          - task: CmdLine@2
+            inputs:
+              script: |
+                yes|argocd login argocd.singhritesh85.com --username admin --password $(ARGOCD_PASSWORD) --grpc-web --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
+                argocd repo add https://github.com/singhritesh85/strimzi-kafka-demo.git --username $(GITHUB_USERNAME) --password $(GITHUB_PASSWORD) --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
+                argocd app create kafka-producer-consumer --project default --repo https://github.com/singhritesh85/strimzi-kafka-demo.git --path ./manifests/kafka-client/ --dest-namespace producer-consumer --sync-option CreateNamespace=true --dest-server https://kubernetes.default.svc --sync-policy automated --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster --upsert
+                #argocd app sync kafka-producer-consumer --kube-context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
+                kubectl get pods -n producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
