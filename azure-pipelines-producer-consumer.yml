@@ -56,12 +56,12 @@ stages:
             kubectl create secret docker-registry producer-consumer-app-secret --docker-server=docker.io --docker-username=$(DOCKERHUB_USERNAME) --docker-password=$(DOCKERHUB_PASSWORD) --namespace=producer-consumer --context=gke_wise-trainer-244916_us-central1_multicloud-gke-cluster
           fi 
           docker system prune -f --all
-          cd src/kafka-producer && docker build -t singhritesh85/kafka-producer:latest -f Dockerfile .
-          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-producer:latest
-          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-producer:latest
-          cd ../../src/kafka-consumer && docker build -t singhritesh85/kafka-consumer:latest -f Dockerfile .
-          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-consumer:latest
-          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-consumer:latest    
+          cd src/kafka-producer && docker build -t singhritesh85/kafka-producer:$(Build.BuildId) -f Dockerfile .
+          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-producer:$(Build.BuildId)
+          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-producer:$(Build.BuildId)
+          cd ../../src/kafka-consumer && docker build -t singhritesh85/kafka-consumer:$(Build.BuildId) -f Dockerfile .
+          trivy image --exit-code 0 --severity MEDIUM,HIGH singhritesh85/kafka-consumer:$(Build.BuildId)
+          #trivy image --exit-code 1 --severity CRITICAL singhritesh85/kafka-consumer:$(Build.BuildId)   
     - task: Docker@2
       inputs:
         containerRegistry: 'Docker-Registry'
