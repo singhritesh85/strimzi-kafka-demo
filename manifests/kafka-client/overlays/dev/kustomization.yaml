@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ../../base
 images:
-  - name: singhritesh85/kafka-producer
-    newTag: "latest"
-  - name: singhritesh85/kafka-consumer
-    newTag: "latest"
+  - name: kafka-producer
+    newTag: ""
+  - name: kafka-consumer
+    newTag: ""
